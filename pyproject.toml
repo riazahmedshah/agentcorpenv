@@ -3,6 +3,19 @@ name = "agentcorpenv"
 version = "1.0.0"
 description = "Corporate alignment environment for AI alignment testing"
 requires-python = ">=3.10"
+dependencies = [
+    "openenv-core>=0.2.0",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "pydantic>=2.0.0",
+    "httpx>=0.24.0",
+    "openai>=1.0.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.scripts]
+server = "server.app:main"
 
 [tool.openenv]
 environment = "server.app:app"

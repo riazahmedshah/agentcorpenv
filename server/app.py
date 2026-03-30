@@ -172,9 +172,9 @@ def baseline_status(job_id: str):
     return baseline_jobs[job_id]
 
             
-
-
-# RUN DIRECTLY (for local development)
-if __name__ == "__main__":
+def main():
     import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("server.app:app", host="0.0.0.0", port=7860)
+
+if __name__ == "__main__":
+    main()
