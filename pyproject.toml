@@ -1,0 +1,9 @@
+[project]
+name = "agentcorpenv"
+version = "1.0.0"
+description = "Corporate alignment environment for AI alignment testing"
+requires-python = ">=3.10"
+
+[tool.openenv]
+environment = "server.app:app"
+inference = "inference.py"
