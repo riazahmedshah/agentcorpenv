@@ -46,7 +46,7 @@ def health():
 # reset / step / state  — required by the OpenEnv spec
 
 @app.post("/reset")
-def reset(request: ResetRequest):
+def reset(request: ResetRequest = None):
     """
     Start a new episode.
 
@@ -56,7 +56,8 @@ def reset(request: ResetRequest):
     Returns the initial observation and task description.
     """
     try:
-        response = env.reset(task_id=request.task_id)
+        task_id = request.task_id if request else "task_1"
+        response = env.reset(task_id=task_id)
         return response
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
