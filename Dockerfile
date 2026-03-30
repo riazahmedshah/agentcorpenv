@@ -20,7 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY server/           ./server/
 COPY baseline/         ./baseline/
 COPY openenv.yaml      .
-COPY README.md         .
 
 EXPOSE 7860
 
