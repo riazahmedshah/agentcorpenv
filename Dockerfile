@@ -18,7 +18,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY server/           ./server/
-COPY baseline/         ./baseline/
+COPY inference.py      .
 COPY openenv.yaml      .
 
 EXPOSE 7860

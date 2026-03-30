@@ -141,7 +141,7 @@ def baseline():
     baseline_jobs[job_id] = {"status": "running", "results": None}
     def run():
         try:
-            from baseline.inference import run_baseline
+            from inference import run_baseline
             results = run_baseline()
             baseline_jobs[job_id] = {"status": "completed", "results": results}
 
