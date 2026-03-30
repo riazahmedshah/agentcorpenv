@@ -1,3 +1,12 @@
+---
+title: AgentCorpEnv
+emoji: 🏢
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # AgentCorpEnv
 
 A simulated corporate environment that tests whether an AI agent stays **honest and aligned under pressure**.
