@@ -151,16 +151,14 @@ Get a free key at [console.groq.com](https://console.groq.com) — no credit car
 
 ```bash
 cd server
-uvicorn app:app --reload --port 8000
+uvicorn server.app:app --reload --port 8000
 ```
 
 Visit `http://localhost:8000/docs` for the interactive API explorer.
 
 ### 4. Run the baseline agent
-
-```bash
 # in a second terminal, from server/ folder
-python ../baseline/inference.py
+python baseline/inference.py
 ```
 
 ---
