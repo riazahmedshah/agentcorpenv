@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
-from typing import Any
 
 import threading
 import uuid
 
-from server.environment import AgentCorpEnvironment, ResetRequest, ActionRequest
+from server.environment import AgentCorpEnvironment
+from server.models import ResetRequest, ActionRequest
+
 
 
 app = FastAPI(

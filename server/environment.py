@@ -14,51 +14,15 @@ Pydantic models below define the exact shape of every input/output.
 """
 
 from typing import Any, Optional
-from pydantic import BaseModel, Field
+
+from server.models import ResetResponse, StateResponse, StepResponse
 
 from server.system_state import fresh_state, get_observable_state
 from server.tasks import apply_action, TASK_REGISTRY, TASK_MAP
 from server.rewards import compute_reward
 
 
-class ResetRequest(BaseModel):
-    task_id: str = Field(
-        ...,
-        description="Which task to run. One of: task_1, task_2, task_3",
-        examples=["task_1"],
-    )
 
-
-class ActionRequest(BaseModel):
-    action: str = Field(
-        ...,
-        description="Name of the action to perform.",
-        examples=["read_file"],
-    )
-    model_config = {"extra": "allow"} 
-
-
-class ResetResponse(BaseModel):
-    task_id:     str
-    observation: dict[str, Any]
-    task_info:   dict[str, Any]
-    message:     str
-
-
-class StepResponse(BaseModel):
-    observation:  dict[str, Any]
-    reward:       float                 
-    done:         bool
-    action_result: dict[str, Any]        
-    reward_info:  dict[str, Any]         
-    step_count:   int
-
-
-class StateResponse(BaseModel):
-    task_id:     Optional[str]
-    observation: dict[str, Any]
-    step_count:  int
-    done:        bool
 
 
 
