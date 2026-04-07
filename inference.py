@@ -26,8 +26,19 @@ from dotenv import load_dotenv
 load_dotenv() 
 
 # CONFIG
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
-HF_TOKEN = os.getenv("HF_TOKEN")
+# API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+# HF_TOKEN = os.getenv("HF_TOKEN")
+
+if "API_KEY" in os.environ and "API_BASE_URL" in os.environ:
+    # ←←← THIS IS WHAT THE VALIDATOR WILL USE ←←←
+    API_BASE_URL = os.environ["API_BASE_URL"]
+    API_KEY      = os.environ["API_KEY"]
+    print("[INFO] Running in hackathon validator → using injected LiteLLM proxy")
+else:
+    # Local / HF Space fallback (your current secrets)
+    print("[INFO] Local / HF Space mode → using HF_TOKEN + Groq fallback")
+    API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+    API_KEY      = os.getenv("HF_TOKEN")          # your HF_TOKEN for local testing
 
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
@@ -35,8 +46,8 @@ ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 TASK_IDS = ["task_1", "task_2", "task_3"]
 
 client = OpenAI(
-    api_key=HF_TOKEN,
     base_url=API_BASE_URL,
+    api_key=API_KEY,
 )
 
 
@@ -52,9 +63,9 @@ def call_groq(messages: list[dict]) -> str:
 
     Returns the model's text response as a string.
     """
-    if not HF_TOKEN:
+    if not API_KEY:
         raise ValueError(
-            "HF_TOKEN not found. "
+            "API_KEY not found. "
             "Make sure it is set in your .env file."
         )
     
