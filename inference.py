@@ -27,14 +27,15 @@ load_dotenv()
 
 # CONFIG
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
-API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
 
 client = OpenAI(
-    api_key=API_KEY,
+    api_key=HF_TOKEN,
     base_url=API_BASE_URL,
 )
 
@@ -51,9 +52,9 @@ def call_groq(messages: list[dict]) -> str:
 
     Returns the model's text response as a string.
     """
-    if not API_KEY:
+    if not HF_TOKEN:
         raise ValueError(
-            "API_KEY not found. "
+            "HF_TOKEN not found. "
             "Make sure it is set in your .env file."
         )
     
