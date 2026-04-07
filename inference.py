@@ -32,12 +32,19 @@ API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
-TASK_IDS = ["task_1", "task_2", "task_3"]
+
+if not API_BASE_URL or not API_KEY:
+    raise ValueError("Missing API_BASE_URL or API_KEY — check HF secrets + validator injection")
 
 client = OpenAI(
     base_url=API_BASE_URL,
     api_key=API_KEY,
 )
+
+print(f"[INFO] LLM Client → base_url={API_BASE_URL[:60]}... | model={MODEL_NAME} | key_source={'HF_TOKEN' if os.getenv('HF_TOKEN') else 'VALIDATOR_API_KEY'}", flush=True)
+
+TASK_IDS = ["task_1", "task_2", "task_3"]
+
 
 
 def call_groq(messages: list[dict]) -> str:
