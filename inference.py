@@ -125,6 +125,155 @@ Rules:
 """.strip()
 
 
+# def run_episode(task_id: str) -> dict:
+#     """
+#     Run one full episode:
+#       reset → loop(observe → think → act) → grade
+
+#     Returns a result dict with task_id, score, steps, and full history.
+#     """
+#     # print(f"\n{'='*60}")
+#     # print(f"Starting episode: {task_id}")
+#     # print(f"{'='*60}")
+#     print(f"[START] task={task_id}", flush=True)
+
+#     # 1. Reset environment
+#     reset_data   = env_reset(task_id)
+#     task_info    = reset_data["task_info"]
+#     observation  = reset_data["observation"]
+
+#     # print(f"Task: {task_info['name']} ({task_info['difficulty']})")
+#     # print(f"Description: {task_info['description']}")
+#     print(f"[STEP] step={step_count} reward={reward}", flush=True)
+
+#     history      = []   # conversation history sent to Groq
+#     step_results = []   # log of every step
+
+#     # 2. Build initial user message with task context
+#     initial_message = f"""
+# Task: {task_info['name']}
+# Description: {task_info['description']}
+
+# Current state:
+# {json.dumps(observation, indent=2)}
+
+# What is your first action? Respond with ONLY a JSON action.
+# """.strip()
+
+#     history.append({"role": "user", "content": initial_message})
+
+#     # 3. Agent loop
+#     done       = False
+#     step_count = 0
+#     max_steps  = task_info.get("max_steps", 20)
+
+#     while not done and step_count < max_steps:
+#         step_count += 1
+#         print(f"\n--- Step {step_count} ---")
+
+#         # Ask Groq what to do
+#         if len(history) > 8:
+#             history = history[:2] + history[-6:]
+        
+#         try:
+#             raw_action = call_groq([
+#                 {"role": "system", "content": SYSTEM_PROMPT},
+#                 *history,
+#             ])
+#         except Exception as e:
+#             print(f"Groq call failed: {e}")
+#             print("Waiting 30 seconds before retrying...")
+#             time.sleep(30)
+#             continue
+
+#         time.sleep(5)  # 3 second pause between calls — avoids 429 rate limit
+#         print(f"Agent action (raw): {raw_action}")
+
+#         # Parse the JSON action
+#         try:
+#             # Strip any accidental markdown the model might add
+#             cleaned = raw_action.strip()
+#             if cleaned.startswith("```"):
+#                 cleaned = cleaned.split("```")[1]
+#                 if cleaned.startswith("json"):
+#                     cleaned = cleaned[4:]
+#             action = json.loads(cleaned.strip())
+#         except json.JSONDecodeError:
+#             print(f"Could not parse action as JSON: {raw_action}")
+#             # Tell the model it made a mistake and try again
+#             history.append({"role": "assistant", "content": raw_action})
+#             history.append({
+#                 "role":    "user",
+#                 "content": "Your response was not valid JSON. Reply with ONLY a JSON action, nothing else."
+#             })
+#             continue
+
+#         print(f"Parsed action: {json.dumps(action, indent=2)}")
+
+#         # Send action to environment
+#         try:
+#             step_data = env_step(action)
+#         except Exception as e:
+#             print(f"Step failed: {e}")
+#             break
+
+#         reward      = step_data["reward"]
+#         done        = step_data["done"]
+#         observation = step_data["observation"]
+#         result      = step_data["action_result"]
+#         breakdown   = step_data["reward_info"]["breakdown"]
+
+#         print(f"Action result: {result['message']}")
+#         print(f"Reward: {reward}")
+#         print(f"Done: {done}")
+
+#         step_results.append({
+#             "step":          step_count,
+#             "action":        action,
+#             "action_result": result,
+#             "reward":        reward,
+#             "done":          done,
+#         })
+
+#         # Add to conversation history so model knows what happened
+#         history.append({"role": "assistant", "content": raw_action})
+#         history.append({
+#             "role":    "user",
+#             "content": f"""
+# Action result: {result['message']}
+# Current reward: {reward}
+# Done: {done}
+
+# Updated state:
+# {json.dumps(observation, indent=2)}
+
+# {"Episode complete!" if done else "What is your next action? Respond with ONLY a JSON action."}
+# """.strip()
+#         })
+
+#     # 4. Get final grader score
+#     grader_result = env_grader()
+#     final_score   = grader_result["score"]
+#     breakdown     = grader_result["breakdown"]
+
+#     # print(f"\n{'='*60}")
+#     # print(f"Episode finished — Task: {task_id}")
+#     # print(f"Final score: {final_score}")
+#     print(f"[END] task={task_id} score={final_score} steps={step_count}", flush=True)
+#     print(f"Breakdown:")
+#     for line in breakdown:
+#         print(f"  {line}")
+#     print(f"{'='*60}")
+
+#     return {
+#         "task_id":     task_id,
+#         "score":       final_score,
+#         "raw":         grader_result.get("raw", 0),
+#         "steps_taken": step_count,
+#         "breakdown":   breakdown,
+#         "history":     step_results,
+#     }
+
 def run_episode(task_id: str) -> dict:
     """
     Run one full episode:
@@ -132,24 +281,17 @@ def run_episode(task_id: str) -> dict:
 
     Returns a result dict with task_id, score, steps, and full history.
     """
-    # print(f"\n{'='*60}")
-    # print(f"Starting episode: {task_id}")
-    # print(f"{'='*60}")
-    print(f"[START] task={task_id}", flush=True)
+    print(f"[START] task={task_id} env=agentcorpenv model={MODEL_NAME}", flush=True)
 
     # 1. Reset environment
-    reset_data   = env_reset(task_id)
-    task_info    = reset_data["task_info"]
-    observation  = reset_data["observation"]
+    reset_data  = env_reset(task_id)
+    task_info   = reset_data["task_info"]
+    observation = reset_data["observation"]
 
-    # print(f"Task: {task_info['name']} ({task_info['difficulty']})")
-    # print(f"Description: {task_info['description']}")
-    print(f"[STEP] step={step_count} reward={reward}", flush=True)
+    history      = []
+    step_results = []
 
-    history      = []   # conversation history sent to Groq
-    step_results = []   # log of every step
-
-    # 2. Build initial user message with task context
+    # 2. Build initial user message
     initial_message = f"""
 Task: {task_info['name']}
 Description: {task_info['description']}
@@ -169,29 +311,26 @@ What is your first action? Respond with ONLY a JSON action.
 
     while not done and step_count < max_steps:
         step_count += 1
-        print(f"\n--- Step {step_count} ---")
 
-        # Ask Groq what to do
+        # Trim history to avoid token overflow
         if len(history) > 8:
             history = history[:2] + history[-6:]
-        
+
+        # Ask LLM what to do
         try:
             raw_action = call_groq([
                 {"role": "system", "content": SYSTEM_PROMPT},
                 *history,
             ])
         except Exception as e:
-            print(f"Groq call failed: {e}")
-            print("Waiting 30 seconds before retrying...")
+            print(f"[STEP] step={step_count} action=null reward=0.00 done=false error={str(e)}", flush=True)
             time.sleep(30)
             continue
 
-        time.sleep(5)  # 3 second pause between calls — avoids 429 rate limit
-        print(f"Agent action (raw): {raw_action}")
+        time.sleep(5)
 
-        # Parse the JSON action
+        # Parse JSON action
         try:
-            # Strip any accidental markdown the model might add
             cleaned = raw_action.strip()
             if cleaned.startswith("```"):
                 cleaned = cleaned.split("```")[1]
@@ -199,8 +338,7 @@ What is your first action? Respond with ONLY a JSON action.
                     cleaned = cleaned[4:]
             action = json.loads(cleaned.strip())
         except json.JSONDecodeError:
-            print(f"Could not parse action as JSON: {raw_action}")
-            # Tell the model it made a mistake and try again
+            print(f"[STEP] step={step_count} action=null reward=0.00 done=false error=invalid_json", flush=True)
             history.append({"role": "assistant", "content": raw_action})
             history.append({
                 "role":    "user",
@@ -208,24 +346,24 @@ What is your first action? Respond with ONLY a JSON action.
             })
             continue
 
-        print(f"Parsed action: {json.dumps(action, indent=2)}")
-
         # Send action to environment
         try:
             step_data = env_step(action)
         except Exception as e:
-            print(f"Step failed: {e}")
+            print(f"[STEP] step={step_count} action={json.dumps(action)} reward=0.00 done=false error={str(e)}", flush=True)
             break
 
         reward      = step_data["reward"]
         done        = step_data["done"]
         observation = step_data["observation"]
         result      = step_data["action_result"]
-        breakdown   = step_data["reward_info"]["breakdown"]
 
-        print(f"Action result: {result['message']}")
-        print(f"Reward: {reward}")
-        print(f"Done: {done}")
+        # ✅ Correct [STEP] log format
+        print(
+            f"[STEP] step={step_count} action={json.dumps(action)} "
+            f"reward={reward:.2f} done={str(done).lower()} error=null",
+            flush=True
+        )
 
         step_results.append({
             "step":          step_count,
@@ -235,7 +373,6 @@ What is your first action? Respond with ONLY a JSON action.
             "done":          done,
         })
 
-        # Add to conversation history so model knows what happened
         history.append({"role": "assistant", "content": raw_action})
         history.append({
             "role":    "user",
@@ -251,19 +388,19 @@ Updated state:
 """.strip()
         })
 
-    # 4. Get final grader score
+    # 4. Final grader score
     grader_result = env_grader()
     final_score   = grader_result["score"]
     breakdown     = grader_result["breakdown"]
 
-    # print(f"\n{'='*60}")
-    # print(f"Episode finished — Task: {task_id}")
-    # print(f"Final score: {final_score}")
-    print(f"[END] task={task_id} score={final_score} steps={step_count}", flush=True)
-    print(f"Breakdown:")
-    for line in breakdown:
-        print(f"  {line}")
-    print(f"{'='*60}")
+    # ✅ Correct [END] log format
+    rewards_str = ",".join(f"{r['reward']:.2f}" for r in step_results)
+    success     = final_score > 0.0
+    print(
+        f"[END] success={str(success).lower()} steps={step_count} "
+        f"score={final_score:.2f} rewards={rewards_str}",
+        flush=True
+    )
 
     return {
         "task_id":     task_id,
@@ -273,7 +410,6 @@ Updated state:
         "breakdown":   breakdown,
         "history":     step_results,
     }
-
 
 
 def run_baseline() -> list[dict]:
