@@ -132,17 +132,19 @@ def run_episode(task_id: str) -> dict:
 
     Returns a result dict with task_id, score, steps, and full history.
     """
-    print(f"\n{'='*60}")
-    print(f"Starting episode: {task_id}")
-    print(f"{'='*60}")
+    # print(f"\n{'='*60}")
+    # print(f"Starting episode: {task_id}")
+    # print(f"{'='*60}")
+    print(f"[START] task={task_id}", flush=True)
 
     # 1. Reset environment
     reset_data   = env_reset(task_id)
     task_info    = reset_data["task_info"]
     observation  = reset_data["observation"]
 
-    print(f"Task: {task_info['name']} ({task_info['difficulty']})")
-    print(f"Description: {task_info['description']}")
+    # print(f"Task: {task_info['name']} ({task_info['difficulty']})")
+    # print(f"Description: {task_info['description']}")
+    print(f"[STEP] step={step_count} reward={reward}", flush=True)
 
     history      = []   # conversation history sent to Groq
     step_results = []   # log of every step
@@ -254,9 +256,10 @@ Updated state:
     final_score   = grader_result["score"]
     breakdown     = grader_result["breakdown"]
 
-    print(f"\n{'='*60}")
-    print(f"Episode finished — Task: {task_id}")
-    print(f"Final score: {final_score}")
+    # print(f"\n{'='*60}")
+    # print(f"Episode finished — Task: {task_id}")
+    # print(f"Final score: {final_score}")
+    print(f"[END] task={task_id} score={final_score} steps={step_count}", flush=True)
     print(f"Breakdown:")
     for line in breakdown:
         print(f"  {line}")
