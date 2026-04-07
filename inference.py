@@ -26,19 +26,8 @@ from dotenv import load_dotenv
 load_dotenv() 
 
 # CONFIG
-# API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
-# HF_TOKEN = os.getenv("HF_TOKEN")
-
-if "API_KEY" in os.environ and "API_BASE_URL" in os.environ:
-    # ←←← THIS IS WHAT THE VALIDATOR WILL USE ←←←
-    API_BASE_URL = os.environ["API_BASE_URL"]
-    API_KEY      = os.environ["API_KEY"]
-    print("[INFO] Running in hackathon validator → using injected LiteLLM proxy")
-else:
-    # Local / HF Space fallback (your current secrets)
-    print("[INFO] Local / HF Space mode → using HF_TOKEN + Groq fallback")
-    API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
-    API_KEY      = os.getenv("HF_TOKEN")          # your HF_TOKEN for local testing
+API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
 
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
