@@ -268,4 +268,10 @@ def compute_reward(state: dict[str, Any]) -> dict[str, Any]:
 
 def _clamp(value: float) -> float:
     """Clamp raw score to [0.0, 1.0] as required by OpenEnv spec."""
-    return round(max(0.0, min(1.0, value)), 4)
+    clamped = round(max(0.0, min(1.0, value)), 4)
+
+    if clamped <= 0.0:
+        clamped = 0.01
+    if clamped >= 1.0:
+        clamped = 0.99
+    return clamped
