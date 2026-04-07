@@ -28,16 +28,13 @@ load_dotenv()
 # CONFIG
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
-HF_TOKEN     = os.getenv("HF_TOKEN") or os.getenv("GROQ_API_KEY")
-
+API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
-
-# ENV_BASE_URL=https://riaz9311-agentcorpenv.hf.space
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
 
 client = OpenAI(
-    api_key=HF_TOKEN,
+    api_key=API_KEY,
     base_url=API_BASE_URL,
 )
 
@@ -54,9 +51,9 @@ def call_groq(messages: list[dict]) -> str:
 
     Returns the model's text response as a string.
     """
-    if not HF_TOKEN:
+    if not API_KEY:
         raise ValueError(
-            "HF_TOKEN not found. "
+            "API_KEY not found. "
             "Make sure it is set in your .env file."
         )
     
@@ -123,156 +120,6 @@ Rules:
 - Never fabricate information
 - Respond with ONLY the JSON action, nothing else
 """.strip()
-
-
-# def run_episode(task_id: str) -> dict:
-#     """
-#     Run one full episode:
-#       reset → loop(observe → think → act) → grade
-
-#     Returns a result dict with task_id, score, steps, and full history.
-#     """
-#     # print(f"\n{'='*60}")
-#     # print(f"Starting episode: {task_id}")
-#     # print(f"{'='*60}")
-#     print(f"[START] task={task_id}", flush=True)
-
-#     # 1. Reset environment
-#     reset_data   = env_reset(task_id)
-#     task_info    = reset_data["task_info"]
-#     observation  = reset_data["observation"]
-
-#     # print(f"Task: {task_info['name']} ({task_info['difficulty']})")
-#     # print(f"Description: {task_info['description']}")
-#     print(f"[STEP] step={step_count} reward={reward}", flush=True)
-
-#     history      = []   # conversation history sent to Groq
-#     step_results = []   # log of every step
-
-#     # 2. Build initial user message with task context
-#     initial_message = f"""
-# Task: {task_info['name']}
-# Description: {task_info['description']}
-
-# Current state:
-# {json.dumps(observation, indent=2)}
-
-# What is your first action? Respond with ONLY a JSON action.
-# """.strip()
-
-#     history.append({"role": "user", "content": initial_message})
-
-#     # 3. Agent loop
-#     done       = False
-#     step_count = 0
-#     max_steps  = task_info.get("max_steps", 20)
-
-#     while not done and step_count < max_steps:
-#         step_count += 1
-#         print(f"\n--- Step {step_count} ---")
-
-#         # Ask Groq what to do
-#         if len(history) > 8:
-#             history = history[:2] + history[-6:]
-        
-#         try:
-#             raw_action = call_groq([
-#                 {"role": "system", "content": SYSTEM_PROMPT},
-#                 *history,
-#             ])
-#         except Exception as e:
-#             print(f"Groq call failed: {e}")
-#             print("Waiting 30 seconds before retrying...")
-#             time.sleep(30)
-#             continue
-
-#         time.sleep(5)  # 3 second pause between calls — avoids 429 rate limit
-#         print(f"Agent action (raw): {raw_action}")
-
-#         # Parse the JSON action
-#         try:
-#             # Strip any accidental markdown the model might add
-#             cleaned = raw_action.strip()
-#             if cleaned.startswith("```"):
-#                 cleaned = cleaned.split("```")[1]
-#                 if cleaned.startswith("json"):
-#                     cleaned = cleaned[4:]
-#             action = json.loads(cleaned.strip())
-#         except json.JSONDecodeError:
-#             print(f"Could not parse action as JSON: {raw_action}")
-#             # Tell the model it made a mistake and try again
-#             history.append({"role": "assistant", "content": raw_action})
-#             history.append({
-#                 "role":    "user",
-#                 "content": "Your response was not valid JSON. Reply with ONLY a JSON action, nothing else."
-#             })
-#             continue
-
-#         print(f"Parsed action: {json.dumps(action, indent=2)}")
-
-#         # Send action to environment
-#         try:
-#             step_data = env_step(action)
-#         except Exception as e:
-#             print(f"Step failed: {e}")
-#             break
-
-#         reward      = step_data["reward"]
-#         done        = step_data["done"]
-#         observation = step_data["observation"]
-#         result      = step_data["action_result"]
-#         breakdown   = step_data["reward_info"]["breakdown"]
-
-#         print(f"Action result: {result['message']}")
-#         print(f"Reward: {reward}")
-#         print(f"Done: {done}")
-
-#         step_results.append({
-#             "step":          step_count,
-#             "action":        action,
-#             "action_result": result,
-#             "reward":        reward,
-#             "done":          done,
-#         })
-
-#         # Add to conversation history so model knows what happened
-#         history.append({"role": "assistant", "content": raw_action})
-#         history.append({
-#             "role":    "user",
-#             "content": f"""
-# Action result: {result['message']}
-# Current reward: {reward}
-# Done: {done}
-
-# Updated state:
-# {json.dumps(observation, indent=2)}
-
-# {"Episode complete!" if done else "What is your next action? Respond with ONLY a JSON action."}
-# """.strip()
-#         })
-
-#     # 4. Get final grader score
-#     grader_result = env_grader()
-#     final_score   = grader_result["score"]
-#     breakdown     = grader_result["breakdown"]
-
-#     # print(f"\n{'='*60}")
-#     # print(f"Episode finished — Task: {task_id}")
-#     # print(f"Final score: {final_score}")
-#     print(f"[END] task={task_id} score={final_score} steps={step_count}", flush=True)
-#     print(f"Breakdown:")
-#     for line in breakdown:
-#         print(f"  {line}")
-#     print(f"{'='*60}")
-
-#     return {
-#         "task_id":     task_id,
-#         "score":       final_score,
-#         "raw":         grader_result.get("raw", 0),
-#         "steps_taken": step_count,
-#         "breakdown":   breakdown,
-#         "history":     step_results,
-#     }
 
 def run_episode(task_id: str) -> dict:
     """
