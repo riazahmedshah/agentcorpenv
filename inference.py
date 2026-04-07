@@ -59,20 +59,17 @@ def call_groq(messages: list[dict]) -> str:
 
     Returns the model's text response as a string.
     """
-    if not API_KEY:
-        raise ValueError(
-            "API_KEY not found. "
-            "Make sure it is set in your .env file."
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=messages,
+            temperature=0.2,
+            max_tokens=1024,
         )
-    
-    response = client.chat.completions.create(
-        model=MODEL_NAME,
-        messages=messages,
-        temperature=0.2,
-        max_tokens=1024,
-    )
-
-    return response.choices[0].message.content
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"[LLM ERROR] {type(e).__name__}: {str(e)}", flush=True)
+        raise
 
 
 def env_reset(task_id: str) -> dict:
