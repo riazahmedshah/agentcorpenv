@@ -26,8 +26,9 @@ from dotenv import load_dotenv
 load_dotenv() 
 
 # CONFIG
-API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL")
+# os.getenv("HF_TOKEN") or
+API_KEY      = os.getenv("API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL") or "https://api.groq.com/v1"
 
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
