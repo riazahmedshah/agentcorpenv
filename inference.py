@@ -23,9 +23,9 @@ import httpx
 from openai import OpenAI
 
 # CONFIG
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1-mini")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
 if HF_TOKEN is None:
@@ -42,7 +42,7 @@ TASK_IDS = ["task_1", "task_2", "task_3"]
 
 def get_llm_response(messages: list[dict]) -> str:
     """
-    Send a conversation to Groq and get the model's reply.
+    Send a conversation to LLM and get the model's reply.
 
     messages format (same as OpenAI):
       [
@@ -52,17 +52,13 @@ def get_llm_response(messages: list[dict]) -> str:
 
     Returns the model's text response as a string.
     """
-    try:
-        response = client.chat.completions.create(
-            model=MODEL_NAME,
-            messages=messages,
-            temperature=0.2,
-            max_tokens=1024,
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        print(f"[LLM ERROR] {type(e).__name__}: {str(e)}", flush=True)
-        raise
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        messages=messages,
+        temperature=0.2,
+        max_tokens=1024,
+    )
+    return response.choices[0].message.content
 
 
 def env_reset(task_id: str) -> dict:
