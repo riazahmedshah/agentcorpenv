@@ -41,8 +41,8 @@ ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 #     )
 
 client = OpenAI(
-    base_url=os.environ["API_BASE_URL"],
-    api_key=os.environ["API_KEY"]
+    base_url=API_BASE_URL,
+    api_key=API_KEY
 )
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
