@@ -1,9 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-import threading
-import uuid
-
 from server.environment import AgentCorpEnvironment
 from server.models import ResetRequest, ActionRequest
 
@@ -126,8 +123,6 @@ def grader():
     return env.grade()
 
 
-baseline_jobs: dict = {}
-
 @app.get("/baseline")
 def baseline():
     """
@@ -138,38 +133,20 @@ def baseline():
 
     Note: requires OPENAI_API_KEY environment variable to be set.
     """
-    job_id = str(uuid.uuid4())[:8]
-    baseline_jobs[job_id] = {"status": "running", "results": None}
-    def run():
-        try:
-            from inference import run_baseline
-            results = run_baseline()
-            baseline_jobs[job_id] = {"status": "completed", "results": results}
-
-        except ImportError:
-            raise HTTPException(
-                status_code = 500,
-                detail      = "Baseline inference module not found. Check baseline/inference.py.",
-            )
-        
-        except Exception as e:
-            baseline_jobs[job_id] = {"status": "failed", "error": str(e)}
-
-    thread = threading.Thread(target=run)
-    thread.start()
-
-    return {
-        "status":   "started",
-        "job_id":   job_id,
-        "message":  "Baseline running in background. Poll /baseline/status/{job_id} for results.",
-        "poll_url": f"/baseline/status/{job_id}"
-    }
-
-@app.get("/baseline/status/{job_id}")
-def baseline_status(job_id: str):
-    if job_id not in baseline_jobs:
-        raise HTTPException(status_code=404, detail="Job not found")
-    return baseline_jobs[job_id]
+    try:
+        from inference import run_baseline
+        results = run_baseline()
+        return {
+            "status": "completed",
+            "results": results,
+        }
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="Baseline inference module not found. Check inference.py.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
             
 def main():

@@ -158,8 +158,8 @@ What is your first action? Respond with ONLY a JSON action.
         step_count += 1
 
         # Trim history to avoid token overflow
-        if len(history) > 8:
-            history = history[:2] + history[-6:]
+        # if len(history) > 8:
+        #     history = history[:2] + history[-6:]
 
         # Ask LLM what to do
         try:
@@ -265,9 +265,9 @@ def run_baseline() -> list[dict]:
     results = []
 
     for i, task_id in enumerate(TASK_IDS):
-        if i > 0:
-            print("\nWaiting 20 seconds between tasks to reset rate limit...")
-            time.sleep(20)
+        # if i > 0:
+        #     print("\nWaiting 20 seconds between tasks to reset rate limit...")
+        #     time.sleep(20)
         try:
             result = run_episode(task_id)
             results.append(result)
