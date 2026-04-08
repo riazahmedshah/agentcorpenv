@@ -26,20 +26,15 @@ from dotenv import load_dotenv
 load_dotenv() 
 
 # CONFIG
-# os.getenv("HF_TOKEN") or
-API_KEY      = os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://api.groq.com/v1"
-
+API_BASE_URL = os.environ["API_BASE_URL"]
+API_KEY      = os.environ["API_KEY"]
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
-
 
 client = OpenAI(
     base_url=API_BASE_URL,
     api_key=API_KEY,
 )
-
-print(f"[INFO] LLM Client → base_url={API_BASE_URL[:60]}... | model={MODEL_NAME} | key_source={'HF_TOKEN' if os.getenv('HF_TOKEN') else 'VALIDATOR_API_KEY'}", flush=True)
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
 
