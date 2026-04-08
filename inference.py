@@ -21,19 +21,19 @@ import json
 import time
 import httpx
 from openai import OpenAI
-# from dotenv import load_dotenv
-
-# load_dotenv() 
 
 # CONFIG
-API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
-MODEL_NAME   = os.getenv("MODEL_NAME") or "llama-3.1-8b-instant"
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+HF_TOKEN = os.getenv("HF_TOKEN")
+MODEL_NAME = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
+
+if HF_TOKEN is None:
+    raise ValueError("HF_TOKEN environment variable is required")
 
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=API_KEY,
+    api_key=HF_TOKEN,
 )
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
