@@ -20,6 +20,7 @@ import os
 import json
 import time
 import httpx
+from mcp import cli
 from openai import OpenAI
 
 from dotenv import load_dotenv
@@ -27,14 +28,21 @@ load_dotenv(override=False)
 
 # CONFIG
 
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-MODEL_NAME   = os.getenv("MODEL_NAME", "gpt-4.1-mini")
-HF_TOKEN     = os.getenv("HF_TOKEN")
+API_BASE_URL = os.getenv("API_BASE_URL", "https://api.groq.com/openai/v1")
+MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
+API_KEY     = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
+# client = None
+# if API_KEY:
+#     client = OpenAI(
+#         base_url=API_BASE_URL,
+#         api_key=API_KEY
+#     )
+
 client = OpenAI(
-    base_url=API_BASE_URL,
-    api_key=HF_TOKEN,
+    base_url=os.environ["API_BASE_URL"],
+    api_key=os.environ["API_KEY"]
 )
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
