@@ -27,14 +27,11 @@ load_dotenv()
 
 # CONFIG
 API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
-API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
+API_BASE_URL = os.getenv("API_BASE_URL")
 
 MODEL_NAME   = os.getenv("MODEL_NAME", "llama-3.1-8b-instant")
 ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
-
-if not API_BASE_URL or not API_KEY:
-    raise ValueError("Missing API_BASE_URL or API_KEY — check HF secrets + validator injection")
 
 client = OpenAI(
     base_url=API_BASE_URL,
@@ -47,7 +44,7 @@ TASK_IDS = ["task_1", "task_2", "task_3"]
 
 
 
-def call_groq(messages: list[dict]) -> str:
+def get_llm_response(messages: list[dict]) -> str:
     """
     Send a conversation to Groq and get the model's reply.
 
@@ -170,7 +167,7 @@ What is your first action? Respond with ONLY a JSON action.
 
         # Ask LLM what to do
         try:
-            raw_action = call_groq([
+            raw_action = get_llm_response([
                 {"role": "system", "content": SYSTEM_PROMPT},
                 *history,
             ])
