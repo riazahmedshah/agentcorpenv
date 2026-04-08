@@ -21,9 +21,9 @@ import json
 import time
 import httpx
 from openai import OpenAI
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv() 
+# load_dotenv() 
 
 # CONFIG
 API_BASE_URL = os.environ["API_BASE_URL"]
