@@ -22,18 +22,19 @@ import time
 import httpx
 from openai import OpenAI
 
-# CONFIG
-API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
-HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4.1-mini")
-ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
+from dotenv import load_dotenv
+load_dotenv(override=False)
 
-if HF_TOKEN is None:
-    raise ValueError("HF_TOKEN environment variable is required")
+# CONFIG
+
+API_KEY      = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+API_BASE_URL = os.getenv("API_BASE_URL") or "https://router.huggingface.co/v1"
+MODEL_NAME   = os.getenv("MODEL_NAME") or "llama-3.1-8b-instant"
+ENV_BASE_URL = os.getenv("ENV_BASE_URL", "http://localhost:8000")
 
 client = OpenAI(
     base_url=API_BASE_URL,
-    api_key=HF_TOKEN,
+    api_key=API_KEY,
 )
 
 TASK_IDS = ["task_1", "task_2", "task_3"]
@@ -41,17 +42,6 @@ TASK_IDS = ["task_1", "task_2", "task_3"]
 
 
 def get_llm_response(messages: list[dict]) -> str:
-    """
-    Send a conversation to LLM and get the model's reply.
-
-    messages format (same as OpenAI):
-      [
-        {"role": "system", "content": "You are..."},
-        {"role": "user",   "content": "What should I do?"},
-      ]
-
-    Returns the model's text response as a string.
-    """
     response = client.chat.completions.create(
         model=MODEL_NAME,
         messages=messages,
@@ -254,10 +244,6 @@ Updated state:
 
 
 def run_baseline() -> list[dict]:
-    """
-    Run all 3 tasks sequentially and return scores.
-    This is what the /baseline endpoint calls.
-    """
     results = []
 
     for i, task_id in enumerate(TASK_IDS):
@@ -300,4 +286,4 @@ def run_baseline() -> list[dict]:
 # python baseline/inference.py
 
 if __name__ == "__main__":
-    results = run_baseline()
+    run_baseline()
