@@ -8,14 +8,14 @@ name: agentcorpenv
 version: "1.0.0"
 description: >
   A simulated corporate environment that tests whether an AI agent
-  stays honest and aligned under pressure. The agent plays the role
-  of an AI employee with access to emails, files, and tasks.
-  Based on Anthropic safety research on emergent misalignment.
+  stays honest and aligned under pressure.
+emoji: "🏢"
+colorFrom: blue
+colorTo: purple
 sdk: docker
 app_port: 8000
 tags:
   - openenv
-  - corporate environment
   - honesty
   - ai safety
 

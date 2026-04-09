@@ -20,7 +20,6 @@ import os
 import json
 import time
 import httpx
-from mcp import cli
 from openai import OpenAI
 
 from dotenv import load_dotenv
