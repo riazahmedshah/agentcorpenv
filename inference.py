@@ -294,4 +294,4 @@ def run_baseline() -> list[dict]:
 # python baseline/inference.py
 
 if __name__ == "__main__":
-    result = run_baseline()
+    run_baseline()

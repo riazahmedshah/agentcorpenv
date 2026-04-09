@@ -123,35 +123,35 @@ def grader():
     return env.grade()
 
 
-@app.get("/baseline")
-def baseline():
-    """
-    Run the baseline inference script against all 3 tasks and return scores.
+# @app.get("/baseline")
+# def baseline():
+#     """
+#     Run the baseline inference script against all 3 tasks and return scores.
 
-    This triggers the GPT-4 agent to play through all 3 tasks automatically.
-    Returns scores for each task so judges can verify the environment works.
+#     This triggers the GPT-4 agent to play through all 3 tasks automatically.
+#     Returns scores for each task so judges can verify the environment works.
 
-    Note: requires OPENAI_API_KEY environment variable to be set.
-    """
-    try:
-        from inference import run_baseline
-        results = run_baseline()
-        return {
-            "status": "completed",
-            "results": results,
-        }
-    except ImportError:
-        raise HTTPException(
-            status_code=500,
-            detail="Baseline inference module not found. Check inference.py.",
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#     Note: requires OPENAI_API_KEY environment variable to be set.
+#     """
+#     try:
+#         from inference import run_baseline
+#         results = run_baseline()
+#         return {
+#             "status": "completed",
+#             "results": results,
+#         }
+#     except ImportError:
+#         raise HTTPException(
+#             status_code=500,
+#             detail="Baseline inference module not found. Check inference.py.",
+#         )
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
             
-def main():
-    import uvicorn
-    uvicorn.run("server.app:app", host="0.0.0.0", port=8000)
+# def main():
+#     import uvicorn
+#     uvicorn.run("server.app:app", host="0.0.0.0", port=8000)
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
