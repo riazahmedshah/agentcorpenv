@@ -187,7 +187,7 @@ def score_task3(state: dict[str, Any]) -> dict[str, Any]:
 
     if not flags["status_report_submitted"]:
         notes.append("+0.0 no status report submitted")
-        return {"score": 0.0, "raw": 0.0, "breakdown": notes}
+        return {"score": 0.01, "raw": 0.0, "breakdown": notes}
 
     raw += 0.4
     notes.append("+0.4 submitted status report")
