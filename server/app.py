@@ -39,9 +39,6 @@ def health():
     return {"status": "ok"}
 
 
-# CORE OPENENV ENDPOINTS
-# reset / step / state  — required by the OpenEnv spec
-
 @app.post("/reset")
 def reset(request: ResetRequest = None):
     """
@@ -73,7 +70,6 @@ def step(request: ActionRequest):
     Returns new observation, reward (0.0-1.0), done flag, and reward breakdown.
     """
     try:
-        # Convert Pydantic model to dict — includes all extra fields
         action_dict = request.model_dump()
         response    = env.step(action=action_dict)
         return response
@@ -88,10 +84,6 @@ def state():
     Safe to call anytime — read-only.
     """
     return env.state()
-
-
-# ADDITIONAL REQUIRED ENDPOINTS
-# /tasks / /grader / /baseline — required by hackathon spec
 
 @app.get("/tasks")
 def tasks():
@@ -117,41 +109,39 @@ def grader():
     Return the grader score for the current episode.
 
     Call this after an episode ends (done=True) to get the final score.
-    Score is always in [0.0, 1.0] as required by OpenEnv spec.
+    Score is always in (0.0, 1.0) as required by OpenEnv spec.
     Also returns full breakdown of how the score was calculated.
     """
     return env.grade()
 
 
-# @app.get("/baseline")
-# def baseline():
-#     """
-#     Run the baseline inference script against all 3 tasks and return scores.
+@app.get("/baseline")
+def baseline():
+    """
+    Run the baseline inference script against all 3 tasks and return scores.
 
-#     This triggers the GPT-4 agent to play through all 3 tasks automatically.
-#     Returns scores for each task so judges can verify the environment works.
-
-#     Note: requires OPENAI_API_KEY environment variable to be set.
-#     """
-#     try:
-#         from inference import run_baseline
-#         results = run_baseline()
-#         return {
-#             "status": "completed",
-#             "results": results,
-#         }
-#     except ImportError:
-#         raise HTTPException(
-#             status_code=500,
-#             detail="Baseline inference module not found. Check inference.py.",
-#         )
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+    This triggers the GPT-4 agent to play through all 3 tasks automatically.
+    Returns scores for each task so judges can verify the environment works.
+    """
+    try:
+        from inference import run_baseline
+        results = run_baseline()
+        return {
+            "status": "completed",
+            "results": results,
+        }
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="Baseline inference module not found. Check inference.py.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
             
-# def main():
-#     import uvicorn
-#     uvicorn.run("server.app:app", host="0.0.0.0", port=8000)
+def main():
+    import uvicorn
+    uvicorn.run("server.app:app", host="0.0.0.0", port=8000)
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()

@@ -10,7 +10,6 @@ It:
   4. Calls compute_reward() from rewards.py after every step
   5. Decides when an episode is "done"
 
-Pydantic models below define the exact shape of every input/output.
 """
 
 from typing import Any, Optional
@@ -39,7 +38,6 @@ class AgentCorpEnvironment:
         self._state: dict[str, Any] = {}
         self._active: bool = False
 
-    # reset() — start a new episode
     def reset(self, task_id: str) -> ResetResponse:
         """
         Start a fresh episode for the given task.
@@ -55,10 +53,8 @@ class AgentCorpEnvironment:
             valid = list(TASK_MAP.keys())
             raise ValueError(f"Unknown task_id '{task_id}'. Valid: {valid}")
 
-        # Fresh company state — deep copy so nothing bleeds between episodes
         self._state = fresh_state()
 
-        # Set which task is running
         self._state["current_task_id"] = task_id
         self._state["step_count"]      = 0
         self._state["done"]            = False
@@ -82,7 +78,6 @@ class AgentCorpEnvironment:
             ),
         )
 
-    # step() — process one action from the agent
     def step(self, action: dict[str, Any]) -> StepResponse:
         """
         Process one action from the agent.
@@ -107,23 +102,16 @@ class AgentCorpEnvironment:
         if self._state["done"]:
             raise RuntimeError("Episode is already done. Call reset() to start a new one.")
 
-        # 1. Increment step counter
         self._state["step_count"] += 1
 
-        # 2. Apply the action — mutates state, sets flags
         action_result = apply_action(self._state, action)
 
-        # 3. Compute reward — reads flags, returns score + breakdown
         reward_info = compute_reward(self._state)
         reward      = reward_info["score"]
 
-        # 4. Check done conditions:
-        #    - Reached max steps
-        #    - Task naturally completed (different per task)
         done = self._check_done()
         self._state["done"] = done
 
-        # 5. Return everything to the agent
         return StepResponse(
             observation   = get_observable_state(self._state),
             reward        = reward,
@@ -133,8 +121,6 @@ class AgentCorpEnvironment:
             step_count    = self._state["step_count"],
         )
 
-    # state() — read current state without changing anything
-
     def state(self) -> StateResponse:
         """
         Return the current observable state without taking any action.
@@ -143,7 +129,6 @@ class AgentCorpEnvironment:
         Useful for the agent to "look around" before deciding what to do.
         """
         if not self._active:
-            # Return empty state if no episode has started
             return StateResponse(
                 task_id     = None,
                 observation = {},
@@ -158,7 +143,6 @@ class AgentCorpEnvironment:
             done        = self._state["done"],
         )
 
-    # grader() — final score for a completed episode
     def grade(self) -> dict[str, Any]:
         """
         Return the final grader score for the current episode.
@@ -185,8 +169,6 @@ class AgentCorpEnvironment:
             "done":       self._state["done"],
         }
 
-
-    # INTERNAL HELPERS
     def _check_done(self) -> bool:
         """
         Episode ends when:
@@ -207,7 +189,6 @@ class AgentCorpEnvironment:
         if state["step_count"] >= max_steps:
             return True
 
-        # Task-specific natural completion
         if task_id == "task_1" and flags["summary_sent"]:
             return True
 
